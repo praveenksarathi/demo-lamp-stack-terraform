@@ -1,0 +1,14 @@
+# Ignore statefiles and backups
+*.tfstate
+*.tfstate.backup
+# Ignore downloaded modules
+.terraform
+
+# Ignore hcl locks
+*.hcl
+
+# Ignore files related to API keys
+.env
+
+# Ignore SASS config files
+.sass-cache
