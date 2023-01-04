@@ -1,0 +1,13 @@
+---
+- name: Install Nginx
+  hosts: all
+  remote_user: ubuntu
+  become: yes
+  vars:
+    service_host: "www.praveenksarathi.com"
+    service_admin_email: "kpraveen15703@gmail.com"
+    service_name: "praveen"
+
+  roles:
+  - nginx
+  - service

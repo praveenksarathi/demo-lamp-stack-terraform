@@ -1,0 +1,88 @@
+- name: Update apt cache
+  apt: update_cache=yes cache_valid_time=86400
+
+# - name: Install depends
+#   apt: name={{ item }} state=latest
+#   loop:
+#     - python
+#     - python-dev
+#     - gcc
+#     - dialog
+#     - libaugeas0
+#     - augeas-lenses
+#     - libssl-dev
+#     - libffi-dev
+#     - ca-certificates
+#     - python-pip
+#     - python-virtualenv
+#     - git
+#     - libpython-dev
+#     - zlib1g-dev
+
+
+- name: install certbox
+  apt:
+    name: letsencrypt
+    state: present
+
+# - apt_repository:
+#     repo: 'ppa:certbot/certbot'
+
+# - apt:
+#     name: "{{ item }}"
+#     update_cache: yes
+#   with_items:
+#     - nginx
+#     - python-certbox-nginx
+
+# - name: install pip3
+#   apt: name=python3-pip state=present 
+
+# - name: Install certbot
+#   pip:
+#     name:
+#       - certbot
+#       - certbot-nginx
+#     executable: pip3
+#   tags:
+#     - nginx
+#     - certbot
+
+# - name: Register certbot
+#   shell: |
+#     certbot -n register --agree-tos --email me@domain.example
+#     touch /etc/letsencrypt/.registered
+#   args:
+#     creates: /etc/letsencrypt/.registered
+#   tags:
+#     - nginx
+#     - certbot
+
+# - name: Setup cronjob for renewal
+#   cron:
+#     name: certbot-renewal
+#     job: "/bin/bash -lc '/usr/local/bin/certbot -q renew'"
+#     minute: "0"
+#     hour: "14"
+#   tags:
+#     - nginx
+#     - certbot
+
+# Auto-renew certificates and reload nginx
+- name: Add crontab to renew certificates
+  become: true
+  cron: minute="30" hour="2" weekday="1" job="certbot renew >> /var/log/le-renew.log"
+
+
+# - name: Lets Encrypt client
+#   git: dest=/opt/certbot clone=yes repo=https://github.com/certbot/certbot force=yes
+
+# - name: set permissions to certbot
+#   file: dest=/opt/certbot mode=u=rwX,g=rwX,o=rwX recurse=yes
+
+# # Auto-renew certificates and reload nginx
+# - name: Add crontab to renew certificates
+#   cron: minute="30" hour="2" weekday="1" job="/opt/certbot/certbot renew >> /var/log/le-renew.log"
+
+- name: Add crontab to reload server
+  cron: minute="35" hour="2" weekday="1" job="/etc/init.d/nginx reload"

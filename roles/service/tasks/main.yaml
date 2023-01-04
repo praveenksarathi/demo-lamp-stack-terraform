@@ -1,0 +1,39 @@
+- name: Add http/https nginx configuration
+  template: src=http.conf.j2 dest=/etc/nginx/sites-available/{{ service_name }}.http.conf owner=www-data group=www-data mode=0644
+
+- name: Add http/https nginx symlink
+  file: src=/etc/nginx/sites-available/{{ service_name }}.http.conf dest=/etc/nginx/sites-enabled/{{ service_name }}.http owner=www-data group=www-data state=link
+
+- name: Creates nginx configuration directory
+  file:
+    path: /etc/nginx/certificate
+    state: directory
+
+- name: Create a directory if it does not exist
+  ansible.builtin.file:
+    path: /etc/nginx/certificate
+    state: directory
+    mode: '0755'
+
+# - name: Create certificate
+#   become: true
+#   # command: /bin/sh "./certbot certonly --webroot --email {{ service_admin_email }} --agree-tos --webroot-path=/usr/share/nginx/html -d {{ service_host }};"
+#   shell: certbot certonly --webroot --email {{ service_admin_email }} --agree-tos --webroot-path=/usr/share/nginx/html -d {{ service_host }};
+#   # shell: ./certbot certonly --webroot --email {{ service_admin_email }} --agree-tos --webroot-path=/usr/share/nginx/html -d {{ service_host }};
+#   # args:
+#   #   chdir: /opt/certbot
+
+- name: Create Self Signed Certificate
+  become: true
+  shell: openssl req -new -newkey rsa:4096 -x509 -sha256 -days 365 -nodes -out nginx-certificate.crt -keyout nginx.key -subj "/C=GB/ST=London/L=London/O=Global Security/OU=IT Department/CN=example.com"
+  args:
+    chdir: /etc/nginx/certificate
+
+# - name: Add https nginx configuration
+#   template: src=https.conf.j2 dest=/etc/nginx/sites-available/{{ service_name }}.https.conf owner=www-data group=www-data mode=0644
+
+# - name: Add external https nginx symlink
+#   file: src=/etc/nginx/sites-available/{{ service_name }}.https.conf dest=/etc/nginx/sites-enabled/{{ service_name }}.https owner=www-data group=www-data state=link
+
+- name: reload nginx
+  service: name=nginx state=reloaded

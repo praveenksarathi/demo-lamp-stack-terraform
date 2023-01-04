@@ -1,0 +1,33 @@
+---
+- name: Ensure Nginx is at the latest version
+  apt:
+    name: nginx
+    state: latest
+
+- name: Make sure Nginx is running
+  systemd:
+    state: started
+    name: nginx
+
+- name: Apt via https
+  apt: name=apt-transport-https state=present
+
+- name: remove sites-enabled nginx default
+  file: path=/etc/nginx/sites-enabled/default state=absent
+
+- name: Generate dhparams file
+  shell: openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
+  
+# - name: Copy our webapp to the destination server
+#   copy:
+#     src: "{{ item }}"
+#     dest: /var/www/html
+#     mode: 0755
+#   with_fileglob:
+#     - apps/html/*
+
+- name: Copy our webapp to the destination server
+  copy:
+    src: apps/html/
+    dest: /var/www/html/{{ service_name }}
+    mode: 0755
