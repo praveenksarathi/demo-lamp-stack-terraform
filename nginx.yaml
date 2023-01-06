@@ -3,6 +3,14 @@
   hosts: all
   remote_user: ubuntu
   become: yes
+  pre_tasks:
+    - name: Update all packages
+      apt:
+        update_cache: yes
+        upgrade: dist
+        force: yes
+    - name: Install auditd
+      command: apt-get --yes install auditd  
   vars:
     service_host: "www.praveenksarathi.com"
     service_admin_email: "kpraveen15703@gmail.com"
@@ -13,5 +21,17 @@
 
   roles:
   - nginx
+  - role: robertdebock.auditd
+    auditd_local_events: "no"
+    auditd_rules:
+      - file: /var/log/audit/
+        keyname: auditlog
+      - file: /etc/audit/
+        permissions:
+          - write
+          - attribute_change
+        keyname: auditconfig
+      - file: /var/log/nginx/
+        keyname: nginx-audit  
   - service
-  - role: christiangda.amazon_cloudwatch_agent # Using a JSON file provided by you at location `files/CloudWatch.json` relative to this playbook
+  - role: christiangda.amazon_cloudwatch_agent # Config at file/nginx.json
