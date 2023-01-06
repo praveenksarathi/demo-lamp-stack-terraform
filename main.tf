@@ -1,6 +1,6 @@
 
 provider "aws" {
-  region = "eu-west-2"
+  region = var.region
 }
 
 resource "aws_kms_key" "praveen_key" {
@@ -54,7 +54,7 @@ resource "aws_security_group" "nginx" {
 resource "aws_instance" "nginx" {
   ami                         = var.ami
   subnet_id                   = var.subnet_id
-  instance_type               = "t2.micro"
+  instance_type               = var.machine_type
   associate_public_ip_address = true
   security_groups             = [aws_security_group.nginx.id]
   key_name                    = var.key_name
@@ -62,7 +62,7 @@ resource "aws_instance" "nginx" {
 
   # root disk
   root_block_device {
-    volume_size           = "20"
+    volume_size           = var.boot_disk_size
     volume_type           = "gp2"
     encrypted             = true
     kms_key_id            = aws_kms_key.praveen_key.key_id
@@ -72,7 +72,7 @@ resource "aws_instance" "nginx" {
   # # data disk (Enable if needed)
   # ebs_block_device {
   #   device_name           = "/dev/xvda"
-  #   volume_size           = "50"
+  #   volume_size           = var.data_disk_size
   #   volume_type           = "gp2"
   #   encrypted             = true
   #   kms_key_id            = aws_kms_key.praveen_key.key_id    
@@ -109,6 +109,8 @@ resource "aws_instance" "nginx" {
   }
 }
 
+#To Display IP details on completion of job
 output "nginx_ip" {
-  value = aws_instance.nginx.public_ip
+  description = "Please access the application using the following IP"
+  value       = aws_instance.nginx.public_ip
 }
