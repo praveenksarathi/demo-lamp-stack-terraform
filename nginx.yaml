@@ -7,7 +7,11 @@
     service_host: "www.praveenksarathi.com"
     service_admin_email: "kpraveen15703@gmail.com"
     service_name: "praveen"
+    cwa_agent_mode: "ec2"
+    cwa_aws_region: "eu-west-2"
+    cwa_conf_json_file_content: "{{ lookup('file', 'files/nginx.json') | from_json }}"
 
   roles:
   - nginx
   - service
+  - role: christiangda.amazon_cloudwatch_agent # Using a JSON file provided by you at location `files/CloudWatch.json` relative to this playbook

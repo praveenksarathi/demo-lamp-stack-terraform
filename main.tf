@@ -9,6 +9,14 @@ resource "aws_kms_key" "praveen_key" {
   customer_master_key_spec = "SYMMETRIC_DEFAULT"
 }
 
+resource "aws_s3_bucket" "log_bucket" {
+  bucket = var.bucket_name
+}
+
+# resource "aws_s3_bucket_acl" "example_bucket_acl" {
+#   bucket = aws_s3_bucket.log_bucket.id
+#   acl    = var.acl_value
+# }
 
 resource "aws_security_group" "nginx" {
   name   = "nginx_access"
@@ -50,13 +58,14 @@ resource "aws_instance" "nginx" {
   associate_public_ip_address = true
   security_groups             = [aws_security_group.nginx.id]
   key_name                    = var.key_name
+  iam_instance_profile        = aws_iam_instance_profile.ec2_profile.name
 
   # root disk
   root_block_device {
     volume_size           = "20"
     volume_type           = "gp2"
     encrypted             = true
-    kms_key_id            = aws_kms_key.praveen_key.key_id      
+    kms_key_id            = aws_kms_key.praveen_key.key_id
     delete_on_termination = true
   }
 
@@ -69,10 +78,10 @@ resource "aws_instance" "nginx" {
   #   kms_key_id            = aws_kms_key.praveen_key.key_id    
   #   delete_on_termination = true
   # }
-  
+
   tags = {
     Name        = "test-app-nginx"
-    Environment = "dev"
+    Environment = "demo"
   }
 
   provisioner "remote-exec" {
